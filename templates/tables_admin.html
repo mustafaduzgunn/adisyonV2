@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Masa Ayarları - Adisyon{% endblock %}
+{% block content %}
+<h1 class="page-title">Masa Ayarları</h1>
+
+<form method="post" action="{{ url_for('add_table') }}" class="inline-form">
+  <input type="text" name="name" placeholder="Yeni masa adı (boş bırakılırsa otomatik)">
+  <button type="submit" class="btn btn-primary">Masa Ekle</button>
+</form>
+
+<ul class="admin-item-list">
+  {% for t in tables %}
+  <li class="admin-item-row">
+    <form method="post" action="{{ url_for('rename_table', table_id=t.id) }}" class="item-edit-form">
+      <input type="text" name="name" value="{{ t.name }}" required>
+      <button type="submit" class="btn btn-small">Kaydet</button>
+    </form>
+    <form method="post" action="{{ url_for('delete_table', table_id=t.id) }}"
+          onsubmit="return confirm('{{ t.name }} silinsin mi?');">
+      <button type="submit" class="btn btn-danger btn-small">Sil</button>
+    </form>
+  </li>
+  {% else %}
+  <li class="empty-note">Henüz masa yok.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

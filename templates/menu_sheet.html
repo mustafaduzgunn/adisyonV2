@@ -1,0 +1,41 @@
+<div class="menu-sheet{{ ' is-edit' if edit }}" id="menuSheet" data-theme="{{ s.theme }}" style="{{ style }}">
+  <div class="menu-frame">
+    <header class="menu-head">
+      {% if s.title or edit %}
+      <h1 class="menu-title" id="mTitle"{% if edit %} contenteditable="plaintext-only" data-placeholder="Menu title"{% endif %}>{{ s.title }}</h1>
+      {% endif %}
+      {% if s.subtitle or edit %}
+      <p class="menu-subtitle" id="mSubtitle"{% if edit %} contenteditable="plaintext-only" data-placeholder="Subtitle (optional)"{% endif %}>{{ s.subtitle }}</p>
+      {% endif %}
+    </header>
+
+    <div class="menu-body">
+      {% for c in categories %}
+      <section class="menu-cat" data-cat-id="{{ c.id }}">
+        <h2 class="menu-cat-title">
+          <span class="cat-name"{% if edit %} contenteditable="plaintext-only" data-cat="{{ c.id }}"{% endif %}>{{ c.name }}</span>
+          {% if edit %}
+          <span class="cat-tools">
+            <button type="button" class="cat-move" data-cat="{{ c.id }}" data-dir="-1" title="Move up">↑</button>
+            <button type="button" class="cat-move" data-cat="{{ c.id }}" data-dir="1" title="Move down">↓</button>
+          </span>
+          {% endif %}
+        </h2>
+        {% for it in c['items'] %}
+        <div class="menu-item">
+          <span class="mi-name"{% if edit %} contenteditable="plaintext-only" data-item="{{ it.id }}" data-field="name"{% endif %}>{{ it.name }}</span>
+          <span class="mi-leader"></span>
+          <span class="mi-price"><span class="mi-num"{% if edit %} contenteditable="plaintext-only" data-item="{{ it.id }}" data-field="price"{% endif %}>{{ it.price_txt }}</span>{% if s.currency %}<span class="mi-cur">&nbsp;{{ s.currency }}</span>{% endif %}</span>
+        </div>
+        {% endfor %}
+      </section>
+      {% else %}
+      <p class="menu-empty">No active items yet. Add categories and items on the Menu page.</p>
+      {% endfor %}
+    </div>
+
+    {% if s.footer or edit %}
+    <footer class="menu-foot" id="mFooter"{% if edit %} contenteditable="plaintext-only" data-placeholder="Footer note (optional)"{% endif %}>{{ s.footer }}</footer>
+    {% endif %}
+  </div>
+</div>

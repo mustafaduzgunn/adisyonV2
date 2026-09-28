@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Garson Hesapları - Adisyon{% endblock %}
+{% block content %}
+<h1 class="page-title">Kullanıcı Hesapları</h1>
+
+<form method="post" action="{{ url_for('add_waiter') }}" class="inline-form stacked">
+  <input type="text" name="username" placeholder="Kullanıcı adı" required>
+  <input type="password" name="password" placeholder="Şifre" required>
+  <select name="role">
+    <option value="waiter">Garson</option>
+    <option value="admin">Yönetici</option>
+  </select>
+  <button type="submit" class="btn btn-primary">Hesap Oluştur</button>
+</form>
+
+<ul class="admin-item-list">
+  {% for u in users %}
+  <li class="admin-item-row">
+    <div class="user-row-info">
+      <span class="username">{{ u.username }}</span>
+      <span class="role-badge role-{{ u.role }}">{{ 'Yönetici' if u.role == 'admin' else 'Garson' }}</span>
+      {% if u.id == session.get('user_id') %}<span class="empty-note">(siz)</span>{% endif %}
+    </div>
+    <form method="post" action="{{ url_for('change_user_password', user_id=u.id) }}" class="item-edit-form">
+      <input type="password" name="password" placeholder="Yeni şifre" minlength="4" required>
+      <button type="submit" class="btn btn-small">Şifre Değiştir</button>
+    </form>
+    {% if u.id != session.get('user_id') %}
+    <form method="post" action="{{ url_for('delete_waiter', user_id=u.id) }}"
+          onsubmit="return confirm('{{ u.username }} hesabı silinsin mi?');">
+      <button type="submit" class="btn btn-danger btn-small">Sil</button>
+    </form>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

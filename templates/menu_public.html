@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ s.title if snap else 'Menu' }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">
+</head>
+<body class="menu-public">
+{% if snap %}
+  {% include "menu_sheet.html" %}
+{% else %}
+  <div class="menu-unpublished">The menu is not available yet.</div>
+{% endif %}
+</body>
+</html>

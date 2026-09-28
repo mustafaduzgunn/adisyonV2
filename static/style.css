@@ -1,0 +1,525 @@
+/* ---------------------------------------------------------------
+   Adisyon — mutfak fişi / sipariş defteri esintili tema
+   --------------------------------------------------------------- */
+
+:root {
+  --bg: #1B211D;
+  --panel: #242B25;
+  --panel-alt: #2E362F;
+  --border: #3A4239;
+  --accent: #D9A441;
+  --accent-dark: #B9832F;
+  --text: #EDEAE1;
+  --text-dim: #A9AFA4;
+  --empty: #4C8C6B;
+  --occupied: #C9622A;
+  --danger: #C4483A;
+  --danger-dark: #A83A2F;
+
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-ticket: ui-monospace, "SF Mono", "Courier New", Courier, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 64px; /* bottom nav space */
+}
+
+a { color: inherit; text-decoration: none; }
+
+button, input, select {
+  font-family: inherit;
+  font-size: 16px;
+}
+
+/* ---------------- Top bar ---------------- */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  font-size: 15px;
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.role-badge {
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.role-admin { background: rgba(217,164,65,0.18); color: var(--accent); }
+.role-waiter { background: rgba(76,140,107,0.18); color: var(--empty); }
+
+.logout-link {
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+}
+
+/* ---------------- Content ---------------- */
+
+.content {
+  flex: 1;
+  padding: 20px 16px 32px;
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 16px;
+  letter-spacing: 0.01em;
+}
+
+.section-title {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin: 24px 0 10px;
+}
+.section-title:first-child { margin-top: 0; }
+
+/* ---------------- Flash messages ---------------- */
+
+.flash-wrap { margin-bottom: 16px; }
+.flash {
+  padding: 10px 14px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  border-left: 3px solid var(--accent);
+  background: var(--panel);
+}
+.flash-error { border-left-color: var(--danger); }
+.flash-success { border-left-color: var(--empty); }
+
+/* ---------------- Login ---------------- */
+
+.login-screen {
+  min-height: calc(100vh - 32px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.login-card {
+  width: 100%;
+  max-width: 340px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 28px 24px;
+  text-align: center;
+}
+.login-mark {
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  font-size: 20px;
+}
+.login-sub {
+  color: var(--text-dim);
+  font-size: 13px;
+  margin: 4px 0 20px;
+}
+.login-form { display: flex; flex-direction: column; gap: 14px; text-align: left; }
+.login-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+/* ---------------- Form controls ---------------- */
+
+input[type="text"], input[type="password"], input[type="number"], select {
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 10px 12px;
+  width: 100%;
+}
+input:focus, select:focus, button:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.btn {
+  background: var(--panel-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn:disabled { opacity: 0.45; cursor: default; }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #201705; }
+.btn-danger { background: transparent; border-color: var(--danger); color: var(--danger); }
+.btn-danger:hover { background: rgba(196,72,58,0.12); }
+.btn-block { width: 100%; margin-top: 10px; }
+.btn-small { padding: 6px 10px; font-size: 13px; }
+.btn-add { background: var(--accent-dark); border-color: var(--accent-dark); color: #201705; padding: 8px 14px; }
+
+/* ---------------- Table grid ---------------- */
+
+.table-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+@media (min-width: 480px) {
+  .table-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.table-card {
+  display: block;
+  border-radius: 6px;
+  padding: 16px 14px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-left: 4px solid var(--empty);
+}
+.table-card.occupied { border-left-color: var(--occupied); }
+.table-card-name { font-weight: 700; font-size: 15px; }
+.table-card-status {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+.table-card.occupied .table-card-status { color: var(--occupied); }
+.table-card.empty .table-card-status { color: var(--empty); }
+.table-card-total {
+  font-family: var(--font-ticket);
+  font-size: 14px;
+  margin-top: 8px;
+  color: var(--accent);
+  min-height: 17px;
+}
+
+/* ---------------- Order screen ---------------- */
+
+.order-header { display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; }
+.back-link { color: var(--text-dim); font-size: 13px; }
+
+.order-current {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px;
+  margin-bottom: 8px;
+}
+
+.order-list {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  font-family: var(--font-ticket);
+  font-size: 14px;
+}
+.order-empty-row { color: var(--text-dim); padding: 8px 0; }
+.order-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.order-row:last-child { border-bottom: none; }
+.order-row-main { display: flex; gap: 8px; align-items: baseline; }
+.order-row-qty { color: var(--accent); }
+.order-row-side { display: flex; align-items: center; gap: 10px; }
+.order-row-note { width: 100%; color: var(--text-dim); font-size: 12px; padding-left: 24px; }
+.cancel-item {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 6px;
+}
+.cancel-item:hover { color: var(--danger); }
+
+.order-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-family: var(--font-ticket);
+}
+
+/* ---------------- Menu picker ---------------- */
+
+.category-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+}
+.cat-tab {
+  flex: 0 0 auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 20px;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cat-tab.active { background: var(--accent); border-color: var(--accent); color: #201705; }
+
+.cat-panel { display: none; }
+.cat-panel.active { display: block; }
+
+.menu-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+.menu-item-name { font-weight: 600; font-size: 14px; }
+.menu-item-price { font-family: var(--font-ticket); color: var(--text-dim); font-size: 13px; margin-top: 2px; }
+
+/* ---------------- Kapatma aksiyonları / veresiye formu ---------------- */
+
+.close-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.credit-form-wrap {
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 2px;
+}
+.credit-form-wrap form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.credit-form-wrap label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* ---------------- Kazanç sayfası ---------------- */
+
+.stat-cards {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.stat-card {
+  flex: 1;
+  min-width: 100px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px;
+  text-align: center;
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.stat-value {
+  font-family: var(--font-ticket);
+  font-size: 20px;
+  color: var(--accent);
+  margin-top: 4px;
+}
+
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 0 8px;
+}
+.bar-chart-col {
+  flex: 0 0 auto;
+  width: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.bar {
+  width: 100%;
+  height: 120px;
+  display: flex;
+  flex-direction: column-reverse;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.bar-cash { background: var(--accent); }
+.bar-credit { background: var(--occupied); }
+.bar-label {
+  font-family: var(--font-ticket);
+  font-size: 9px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.legend {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 6px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+.legend-cash { background: var(--accent); }
+.legend-credit { background: var(--occupied); }
+
+.export-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+/* ---------------- Admin lists / forms ---------------- */
+
+.inline-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.inline-form.stacked { flex-direction: column; max-width: 320px; }
+.inline-form input, .inline-form select { flex: 1; min-width: 120px; }
+
+.admin-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.admin-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.admin-card-header h2 { font-size: 15px; margin: 0; }
+
+.admin-item-list { list-style: none; margin: 0; padding: 0; }
+.admin-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.admin-item-row:last-child { border-bottom: none; }
+
+.item-edit-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 1;
+  flex-wrap: wrap;
+}
+.item-edit-form input[type="text"] { flex: 2; min-width: 100px; }
+.item-edit-form input[type="number"] { flex: 1; min-width: 70px; }
+.active-check { font-size: 12px; color: var(--text-dim); display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+
+.user-row-info { display: flex; align-items: center; gap: 10px; }
+
+.empty-note { color: var(--text-dim); font-size: 13px; }
+
+/* ---------------- Bottom nav ---------------- */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+  z-index: 10;
+  overflow-x: auto;
+}
+.bottom-nav a {
+  flex: 1 0 auto;
+  min-width: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 6px 10px;
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.bottom-nav a.active { color: var(--accent); }
+.nav-icon { font-size: 18px; }

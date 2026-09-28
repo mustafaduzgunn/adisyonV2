@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Veresiye Hesapları - Adisyon{% endblock %}
+{% block content %}
+<h1 class="page-title">Veresiye Hesapları</h1>
+
+<div class="stat-cards">
+  <div class="stat-card">
+    <div class="stat-label">Toplam Alacak</div>
+    <div class="stat-value">{{ '%.2f'|format(total_debt) }}</div>
+  </div>
+</div>
+
+<form method="post" action="{{ url_for('add_credit_account') }}" class="inline-form stacked">
+  <input type="text" name="name" placeholder="Ad Soyad" required>
+  <input type="text" name="phone" placeholder="Telefon (opsiyonel)">
+  <button type="submit" class="btn btn-primary">Hesap Oluştur</button>
+</form>
+
+<ul class="admin-item-list">
+  {% for acc in accounts %}
+  <li class="admin-item-row">
+    <div class="user-row-info">
+      <span class="username">{{ acc.name }}</span>
+      {% if acc.phone %}<span class="empty-note">{{ acc.phone }}</span>{% endif %}
+      <span class="role-badge {{ 'role-waiter' if acc.balance == 0 else 'role-admin' }}">
+        {{ '%.2f'|format(acc.balance) }} borç
+      </span>
+    </div>
+    <form method="post" action="{{ url_for('add_credit_payment', account_id=acc.id) }}" class="item-edit-form">
+      <input type="number" step="0.01" min="0.01" name="amount" placeholder="Ödeme tutarı">
+      <button type="submit" class="btn btn-small">Ödeme Al</button>
+    </form>
+    <form method="post" action="{{ url_for('delete_credit_account', account_id=acc.id) }}"
+          onsubmit="return confirm('{{ acc.name }} hesabı silinsin mi?');">
+      <button type="submit" class="btn btn-danger btn-small">Sil</button>
+    </form>
+  </li>
+  {% else %}
+  <li class="empty-note">Henüz veresiye hesabı yok.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

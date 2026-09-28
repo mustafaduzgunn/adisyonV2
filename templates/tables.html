@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Masalar - Adisyon{% endblock %}
+{% block content %}
+<h1 class="page-title">Masalar</h1>
+<div class="table-grid" id="table-grid">
+  {% for t in tables %}
+  <a class="table-card {{ 'occupied' if t.order_id else 'empty' }}" href="{{ url_for('table_detail', table_id=t.id) }}" data-table-id="{{ t.id }}">
+    <div class="table-card-name">{{ t.name }}</div>
+    <div class="table-card-status">{{ 'Dolu' if t.order_id else 'Boş' }}</div>
+    <div class="table-card-total">{{ '%.2f'|format(t.total) if t.order_id else '' }}</div>
+  </a>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function refreshTables() {
+  try {
+    const res = await fetch("{{ url_for('api_tables') }}");
+    const data = await res.json();
+    data.forEach(t => {
+      const card = document.querySelector(`.table-card[data-table-id="${t.id}"]`);
+      if (!card) return;
+      card.classList.toggle('occupied', t.occupied);
+      card.classList.toggle('empty', !t.occupied);
+      card.querySelector('.table-card-status').textContent = t.occupied ? 'Dolu' : 'Boş';
+      card.querySelector('.table-card-total').textContent = t.occupied ? t.total.toFixed(2) : '';
+    });
+  } catch (e) { /* sessizce yeniden dene */ }
+}
+setInterval(refreshTables, 4000);
+</script>
+{% endblock %}

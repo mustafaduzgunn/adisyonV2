@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Menü Yönetimi - Adisyon{% endblock %}
+{% block content %}
+<h1 class="page-title">Menü Yönetimi</h1>
+
+<div class="export-actions">
+  <a href="{{ url_for('menu_designer.menu_designer_page') }}" class="btn btn-small btn-primary">Menu Designer</a>
+  <a href="{{ url_for('export_menu_csv') }}" class="btn btn-small">CSV İndir</a>
+  <a href="{{ url_for('export_menu_pdf') }}" class="btn btn-small">PDF İndir</a>
+</div>
+
+<form method="post" action="{{ url_for('add_category') }}" class="inline-form">
+  <input type="text" name="name" placeholder="Yeni kategori adı" required>
+  <button type="submit" class="btn btn-primary">Kategori Ekle</button>
+</form>
+
+{% for cat in categories %}
+<section class="admin-card">
+  <div class="admin-card-header">
+    <h2>{{ cat.name }}</h2>
+    <form method="post" action="{{ url_for('delete_category', cat_id=cat.id) }}"
+          onsubmit="return confirm('{{ cat.name }} kategorisi ve içindeki tüm ürünler silinsin mi?');">
+      <button type="submit" class="btn btn-danger btn-small">Kategoriyi Sil</button>
+    </form>
+  </div>
+
+  <ul class="admin-item-list">
+    {% for item in items_by_cat.get(cat.id, []) %}
+    <li class="admin-item-row">
+      <form method="post" action="{{ url_for('update_item', item_id=item.id) }}" class="item-edit-form">
+        <input type="text" name="name" value="{{ item.name }}" required>
+        <input type="number" step="0.01" name="price" value="{{ item.price }}" required>
+        <label class="active-check">
+          <input type="checkbox" name="active" {{ 'checked' if item.active }}> Aktif
+        </label>
+        <button type="submit" class="btn btn-small">Kaydet</button>
+      </form>
+      <form method="post" action="{{ url_for('delete_item', item_id=item.id) }}"
+            onsubmit="return confirm('{{ item.name }} silinsin mi?');">
+        <button type="submit" class="btn btn-danger btn-small">Sil</button>
+      </form>
+    </li>
+    {% else %}
+    <li class="empty-note">Bu kategoride ürün yok.</li>
+    {% endfor %}
+  </ul>
+
+  <form method="post" action="{{ url_for('add_item') }}" class="inline-form">
+    <input type="hidden" name="category_id" value="{{ cat.id }}">
+    <input type="text" name="name" placeholder="Ürün adı" required>
+    <input type="number" step="0.01" name="price" placeholder="Fiyat" required>
+    <button type="submit" class="btn btn-primary btn-small">Ürün Ekle</button>
+  </form>
+</section>
+{% else %}
+<p class="empty-note">Henüz kategori yok. Yukarıdan bir kategori ekleyin.</p>
+{% endfor %}
+{% endblock %}

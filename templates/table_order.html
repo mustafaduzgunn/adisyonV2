@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}{{ table.name }} - Adisyon{% endblock %}
+{% block content %}
+<div class="order-screen" data-table-id="{{ table.id }}">
+  <div class="order-header">
+    <a href="{{ url_for('tables_view') }}" class="back-link">← Masalar</a>
+    <h1 class="page-title">{{ table.name }}</h1>
+  </div>
+
+  <section class="order-current">
+    <h2 class="section-title">Sipariş</h2>
+    <ul class="order-list" id="order-list">
+      <li class="order-empty-row">Henüz sipariş yok</li>
+    </ul>
+    <div class="order-total-row">
+      <span>Toplam</span>
+      <strong id="order-total">0.00</strong>
+    </div>
+    {% if current_role == 'admin' %}
+    <div class="close-actions">
+      <form method="post" action="{{ url_for('close_table', table_id=table.id) }}"
+            onsubmit="return confirm('Bu masanın hesabını kapatmak istediğinize emin misiniz?');">
+        <button type="submit" class="btn btn-danger btn-block" id="close-btn" disabled>Hesabı Kapat</button>
+      </form>
+
+      <button type="button" class="btn btn-block" id="credit-toggle-btn" disabled>Veresiye Yaz</button>
+
+      <div class="credit-form-wrap" id="credit-form-wrap" hidden>
+        <form method="post" action="{{ url_for('close_table_credit', table_id=table.id) }}"
+              onsubmit="return confirm('Bu hesap veresiye olarak yazılsın mı?');">
+          <label>Mevcut veresiye hesabı
+            <select name="credit_account_id">
+              <option value="">— Seç —</option>
+              {% for acc in credit_accounts %}
+              <option value="{{ acc.id }}">{{ acc.name }} ({{ '%.2f'|format(acc.balance) }} borç)</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label>veya yeni hesap adı
+            <input type="text" name="new_account_name" placeholder="Ad Soyad">
+          </label>
+          <input type="text" name="new_account_phone" placeholder="Telefon (opsiyonel)">
+          <button type="submit" class="btn btn-primary btn-block">Veresiyeye Yaz</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="menu-picker">
+    <h2 class="section-title">Menüden Ekle</h2>
+    <div class="category-tabs">
+      {% for cat in categories %}
+      <button type="button" class="cat-tab {{ 'active' if loop.first }}" data-cat="{{ cat.id }}">{{ cat.name }}</button>
+      {% endfor %}
+    </div>
+    {% for cat in categories %}
+    <div class="cat-panel {{ 'active' if loop.first }}" data-cat-panel="{{ cat.id }}">
+      {% for item in items_by_cat.get(cat.id, []) %}
+      <div class="menu-item-row">
+        <div class="menu-item-info">
+          <div class="menu-item-name">{{ item.name }}</div>
+          <div class="menu-item-price">{{ '%.2f'|format(item.price) }}</div>
+        </div>
+        <button type="button" class="btn btn-add" data-add-item="{{ item.id }}">Ekle</button>
+      </div>
+      {% else %}
+      <p class="empty-note">Bu kategoride ürün yok.</p>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const TABLE_ID = {{ table.id }};
+const ORDER_API = `/api/table/${TABLE_ID}/order`;
+const ADD_API = `/api/table/${TABLE_ID}/add_item`;
+const IS_ADMIN = {{ 'true' if current_role == 'admin' else 'false' }};
+
+function fmt(n) { return Number(n).toFixed(2); }
+
+async function refreshOrder() {
+  try {
+    const res = await fetch(ORDER_API);
+    const data = await res.json();
+    const list = document.getElementById('order-list');
+    const totalEl = document.getElementById('order-total');
+    const closeBtn = document.getElementById('close-btn');
+    const creditToggleBtn = document.getElementById('credit-toggle-btn');
+
+    if (!data.open || data.items.length === 0) {
+      list.innerHTML = '<li class="order-empty-row">Henüz sipariş yok</li>';
+      totalEl.textContent = '0.00';
+      if (closeBtn) closeBtn.disabled = true;
+      if (creditToggleBtn) creditToggleBtn.disabled = true;
+      return;
+    }
+
+    list.innerHTML = data.items.map(it => `
+      <li class="order-row">
+        <div class="order-row-main">
+          <span class="order-row-qty">${it.quantity}×</span>
+          <span class="order-row-name">${it.item_name}</span>
+        </div>
+        <div class="order-row-side">
+          <span class="order-row-price">${fmt(it.unit_price * it.quantity)}</span>
+          <button type="button" class="cancel-item" data-item-id="${it.id}" title="Kaldır">✕</button>
+        </div>
+        ${it.note ? `<div class="order-row-note">${it.note}</div>` : ''}
+      </li>
+    `).join('');
+    totalEl.textContent = fmt(data.total);
+    if (closeBtn) closeBtn.disabled = false;
+    if (creditToggleBtn) creditToggleBtn.disabled = false;
+
+    list.querySelectorAll('.cancel-item').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        await fetch(`/api/order_item/${btn.dataset.itemId}/cancel`, { method: 'POST' });
+        refreshOrder();
+      });
+    });
+  } catch (e) { /* sessizce yeniden dene */ }
+}
+
+document.querySelectorAll('[data-add-item]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    btn.textContent = '...';
+    try {
+      await fetch(ADD_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ menu_item_id: btn.dataset.addItem, quantity: 1 })
+      });
+      await refreshOrder();
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Ekle';
+    }
+  });
+});
+
+const creditToggleBtn = document.getElementById('credit-toggle-btn');
+const creditFormWrap = document.getElementById('credit-form-wrap');
+if (creditToggleBtn && creditFormWrap) {
+  creditToggleBtn.addEventListener('click', () => {
+    creditFormWrap.hidden = !creditFormWrap.hidden;
+  });
+}
+
+document.querySelectorAll('.cat-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.cat-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelector(`.cat-panel[data-cat-panel="${tab.dataset.cat}"]`).classList.add('active');
+  });
+});
+
+refreshOrder();
+setInterval(refreshOrder, 3000);
+</script>
+{% endblock %}

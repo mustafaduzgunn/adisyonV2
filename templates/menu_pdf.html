@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+@page { size: A4; margin: 0; background: {{ page_bg|safe }}; }
+{{ css|safe }}
+</style>
+</head>
+<body class="menu-pdf">
+{% include "menu_sheet.html" %}
+</body>
+</html>

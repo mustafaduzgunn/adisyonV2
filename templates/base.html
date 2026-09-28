@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>{% block title %}Adisyon{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+{% if session.get('user_id') %}
+<header class="topbar">
+  <div class="topbar-brand">ADİSYON</div>
+  <div class="topbar-user">
+    <span class="role-badge role-{{ session.get('role') }}">{{ 'Yönetici' if session.get('role')=='admin' else 'Garson' }}</span>
+    <span class="username">{{ session.get('username') }}</span>
+    <a href="{{ url_for('logout') }}" class="logout-link">Çıkış</a>
+  </div>
+</header>
+{% endif %}
+
+<main class="content">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-wrap">
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+{% if session.get('user_id') %}
+<nav class="bottom-nav">
+  <a href="{{ url_for('tables_view') }}" class="{{ 'active' if request.endpoint == 'tables_view' or request.endpoint == 'table_detail' }}">
+    <span class="nav-icon">▦</span><span>Masalar</span>
+  </a>
+  {% if session.get('role') == 'admin' %}
+  <a href="{{ url_for('admin_menu') }}" class="{{ 'active' if request.endpoint == 'admin_menu' }}">
+    <span class="nav-icon">☰</span><span>Menü</span>
+  </a>
+  <a href="{{ url_for('admin_tables') }}" class="{{ 'active' if request.endpoint == 'admin_tables' }}">
+    <span class="nav-icon">▭</span><span>Masa Ayarı</span>
+  </a>
+  <a href="{{ url_for('admin_waiters') }}" class="{{ 'active' if request.endpoint == 'admin_waiters' }}">
+    <span class="nav-icon">◍</span><span>Garsonlar</span>
+  </a>
+  <a href="{{ url_for('admin_earnings') }}" class="{{ 'active' if request.endpoint == 'admin_earnings' }}">
+    <span class="nav-icon">▲</span><span>Kazanç</span>
+  </a>
+  <a href="{{ url_for('admin_credit_accounts') }}" class="{{ 'active' if request.endpoint == 'admin_credit_accounts' }}">
+    <span class="nav-icon">◎</span><span>Veresiye</span>
+  </a>
+  {% endif %}
+</nav>
+{% endif %}
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Menu Designer - Adisyon{% endblock %}
+{% block content %}
+<style>.content { max-width: 1240px; }</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='menu_designer.css') }}">
+
+<h1 class="page-title">Menu Designer</h1>
+<p class="md-status"><a href="{{ url_for('admin_menu') }}">← Back to Menu management</a> · Click any text in the preview to edit it. Add or remove items on the Menu page.</p>
+
+<div class="md-wrap">
+  <aside class="md-panel">
+
+    <section class="admin-card">
+      <h3>Template</h3>
+      <div class="md-themes" id="themes">
+        {% for key, t in themes.items() %}
+        <div class="md-theme{{ ' active' if s.theme == key }}" data-theme="{{ key }}" style="background: {{ t.bg }}">{{ t.label }}</div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="admin-card">
+      <h3>Text</h3>
+      <label>Title</label><input type="text" data-key="title" maxlength="80">
+      <label>Subtitle</label><input type="text" data-key="subtitle" maxlength="120">
+      <label>Footer</label><input type="text" data-key="footer" maxlength="200">
+      <label>Currency symbol (empty = none)</label><input type="text" data-key="currency" maxlength="4">
+    </section>
+
+    <section class="admin-card">
+      <h3>Background</h3>
+      <select data-key="bg_mode">
+        <option value="theme">Template default</option>
+        <option value="color">Solid color</option>
+        <option value="image">Custom image</option>
+      </select>
+      <div class="md-row" style="margin-top:8px"><label style="margin:0">Color</label><input type="color" data-key="bg_color"></div>
+      <label>Upload image (JPG / PNG / WebP, max 8 MB)</label>
+      <input type="file" id="bgFile" accept="image/*">
+      <label>Image overlay: <span id="ovVal"></span>%</label>
+      <input type="range" min="0" max="90" data-key="overlay" style="width:100%">
+      <div class="md-row"><label style="margin:0">Overlay color</label><input type="color" data-key="overlay_color"></div>
+    </section>
+
+    <section class="admin-card">
+      <h3>Colors</h3>
+      <div class="md-colors">
+        <label>Title <input type="color" data-key="title_color"></label>
+        <label>Category <input type="color" data-key="cat"></label>
+        <label>Text <input type="color" data-key="text"></label>
+        <label>Price <input type="color" data-key="price"></label>
+        <label>Lines <input type="color" data-key="leader"></label>
+      </div>
+    </section>
+
+    <section class="admin-card">
+      <h3>Layout</h3>
+      <label>Font</label>
+      <select data-key="font">{% for k, l in fonts.items() %}<option value="{{ k }}">{{ l }}</option>{% endfor %}</select>
+      <label>Alignment (title &amp; categories)</label>
+      <select data-key="align"><option value="left">Left</option><option value="center">Center</option></select>
+      <label>Columns</label>
+      <select data-key="columns"><option value="1">1</option><option value="2">2</option></select>
+      <label>Title size</label><input type="range" min="24" max="90" data-key="title_size" style="width:100%">
+      <label>Category size</label><input type="range" min="16" max="48" data-key="cat_size" style="width:100%">
+      <label>Item size</label><input type="range" min="12" max="30" data-key="item_size" style="width:100%">
+    </section>
+
+    <section class="admin-card">
+      <h3>Publish &amp; export</h3>
+      <p class="md-status" id="pubStatus"></p>
+      <div class="md-row">
+        <button class="btn btn-primary btn-small" id="btnPublish">Publish</button>
+        <button class="btn btn-danger btn-small" id="btnUnpublish">Unpublish</button>
+        <button class="btn btn-small" id="btnPdf">Download PDF</button>
+      </div>
+      <p class="md-link">Public link: <a id="pubLink" href="{{ url_for('menu_designer.public_menu') }}" target="_blank">{{ default_addr }}/menu</a></p>
+      <p class="md-status">Publishing takes a snapshot of the current design and prices. Later edits stay in draft until you publish again.</p>
+      <p class="md-status" id="saveStatus">All changes saved.</p>
+    </section>
+
+    <section class="admin-card md-qr">
+      <h3>QR code</h3>
+      <label>Program address (e.g. restoran.com or http://100.100.100.100:5000)</label>
+      <input type="text" id="qrAddr" value="{{ default_addr }}">
+      <div class="md-row" style="margin-top:8px">
+        <button class="btn btn-small" id="btnQr">Generate</button>
+        <a class="btn btn-small" id="qrDownload" href="#" style="display:none">Download PNG</a>
+      </div>
+      <img id="qrImg" alt="QR code" style="display:none">
+      <p class="md-status" id="qrUrl"></p>
+    </section>
+  </aside>
+
+  <div class="md-preview">{% include "menu_sheet.html" %}</div>
+</div>
+
+<div class="md-toast" id="toast"></div>
+
+<script>
+window.MD = {
+  settings: {{ s|tojson }},
+  themes: {{ themes|tojson }},
+  publishedAt: {{ published_at|tojson }},
+  urls: {
+    draft: "{{ url_for('menu_designer.api_save_draft') }}",
+    bg: "{{ url_for('menu_designer.api_upload_bg') }}",
+    publish: "{{ url_for('menu_designer.api_publish') }}",
+    unpublish: "{{ url_for('menu_designer.api_unpublish') }}",
+    pdf: "{{ url_for('menu_designer.export_pdf') }}",
+    qr: "{{ url_for('menu_designer.qr_png') }}",
+    category: "/admin/menu-design/api/category/",
+    item: "/admin/menu-design/api/item/"
+  }
+};
+</script>
+<script src="{{ url_for('static', filename='menu_designer.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Kazanç - Adisyon{% endblock %}
+{% block content %}
+<h1 class="page-title">Kazanç Durumu</h1>
+
+<div class="stat-cards">
+  <div class="stat-card">
+    <div class="stat-label">Bugün</div>
+    <div class="stat-value">{{ '%.2f'|format(today_total) }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Bu Hafta</div>
+    <div class="stat-value">{{ '%.2f'|format(week_total) }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Bu Ay</div>
+    <div class="stat-value">{{ '%.2f'|format(month_total) }}</div>
+  </div>
+</div>
+
+<h2 class="section-title">Son 30 Gün</h2>
+{% if chart_days %}
+<div class="bar-chart">
+  {% for d in chart_days %}
+  <div class="bar-chart-col" title="{{ d.day }}: {{ '%.2f'|format(d.day_total) }}">
+    <div class="bar">
+      <div class="bar-cash" style="height: {{ (d.cash_total / max_total * 100) }}%"></div>
+      <div class="bar-credit" style="height: {{ (d.credit_total / max_total * 100) }}%"></div>
+    </div>
+    <div class="bar-label">{{ d.day[5:] }}</div>
+  </div>
+  {% endfor %}
+</div>
+<div class="legend">
+  <span><span class="legend-dot legend-cash"></span>Nakit/Kart</span>
+  <span><span class="legend-dot legend-credit"></span>Veresiye</span>
+</div>
+{% else %}
+<p class="empty-note">Henüz kapatılmış hesap yok.</p>
+{% endif %}
+{% endblock %}
