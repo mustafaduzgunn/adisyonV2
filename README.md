@@ -142,3 +142,20 @@ static/menu.css            -> menü sayfası stilleri (templateler burada)
 static/menu_designer.css/js-> editör arayüzü
 adisyon.db                 -> otomatik oluşturulan SQLite veritabanı
 ```
+## Kaldırma
+
+```bash
+# Normal kaldırma (onay sorar)
+powershell -ExecutionPolicy Bypass -File .\scripts\uninstall-msys2.ps1
+
+# Pip paketleriyle birlikte, onaysız
+powershell -ExecutionPolicy Bypass -File .\scripts\uninstall-msys2.ps1 -RemovePythonPackages -Force
+
+# Farklı dizine kurduysan
+powershell -ExecutionPolicy Bypass -File .\scripts\uninstall-msys2.ps1 -MsysRoot "D:\msys64"
+```
+MSYS2 kalsın, sadece Pango gitsin istersen, MSYS2 terminalinde:
+```bash
+pacman -Rns mingw-w64-x86_64-pango     # paketi ve artık gereksiz bağımlılıklarını kaldırır
+pacman -Scc                            # indirme önbelleğini temizler
+```
